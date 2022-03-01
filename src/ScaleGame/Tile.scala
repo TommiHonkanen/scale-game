@@ -1,0 +1,5 @@
+package ScaleGame
+
+class Tile {
+
+}
