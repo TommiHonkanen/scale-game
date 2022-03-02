@@ -1,5 +1,5 @@
 package ScaleGame
 
-class Game {
+class Game (playerAmount: Int, weightAmount: Int, newScaleProbability: Int){
 
 }

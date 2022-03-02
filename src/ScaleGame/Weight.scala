@@ -1,3 +1,5 @@
 package ScaleGame
 
-case class Weight()
+class Weight(owner: Player) {
+
+}

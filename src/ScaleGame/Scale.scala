@@ -1,5 +1,5 @@
 package ScaleGame
 
-class Scale {
+class Scale(val radius: Int) {
 
 }

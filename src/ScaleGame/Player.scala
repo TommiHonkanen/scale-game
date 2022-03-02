@@ -1,5 +1,5 @@
 package ScaleGame
 
-class Player {
+class Player(val symbol: Char, weights: Int) {
 
 }

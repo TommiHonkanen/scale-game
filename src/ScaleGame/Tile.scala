@@ -1,5 +1,5 @@
 package ScaleGame
 
-class Tile {
+class Tile(val distance: Int) {
 
 }
