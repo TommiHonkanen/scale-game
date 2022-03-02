@@ -1,8 +1,8 @@
 package ScaleGame
 
-class Player(val symbol: Char, weights: Int) {
+class Player(val symbol: Char, weightAmount: Int) {
 
-  var weightsLeft = weights
+  var weightsLeft = weightAmount
 
   var points: Int = 0
 

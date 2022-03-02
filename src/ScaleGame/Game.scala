@@ -16,7 +16,7 @@ class Game (val playerAmount: Int, val weightAmount: Int, val newScaleProbabilit
   var turn: Player = players(0)
 
   def addPlayer(symbol: Char, weightAmount: Int): Unit = {
-    ???
+    this.players(symbol.toInt - 97) = new Player(symbol, weightAmount)
   }
 
   def addScale(): Unit = {
