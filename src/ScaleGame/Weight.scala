@@ -1,5 +1,7 @@
 package ScaleGame
 
-class Weight(owner: Player) {
+class Weight(originalOwner: Player) {
+
+  var owner: Option[Player] = Some(originalOwner)
 
 }
