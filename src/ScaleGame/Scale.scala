@@ -50,7 +50,7 @@ class Scale(val radius: Int, val symbol: Char) {
       var sum = 0
       allTiles.foreach( tile =>
         if (tile.scale.isEmpty) sum += tile.pointsForPlayer(player)
-        else sum += tile.scale.get.pointsPerPlayer(Array(player))(player)
+        else sum += tile.distance * tile.scale.get.pointsPerPlayer(Array(player))(player)
       )
       points(player) = sum
     }

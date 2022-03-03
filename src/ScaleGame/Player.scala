@@ -6,4 +6,6 @@ class Player(val symbol: Char, weightAmount: Int) {
 
   var points: Int = 0
 
+  override def toString = this.symbol.toString
+
 }

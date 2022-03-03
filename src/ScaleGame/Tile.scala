@@ -20,7 +20,7 @@ class Tile(val distance: Int) {
     }
   }
 
-  override def toString = {
-    s"${this.distance}, ${this.weights}"
-  }
+  override def toString = s"${this.distance}, ${this.weights}, ${this.scale}"
+
+
 }
