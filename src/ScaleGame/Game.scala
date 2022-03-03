@@ -3,13 +3,11 @@ package ScaleGame
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
-class Game (val playerAmount: Int, val weightAmount: Int, val newScaleProbability: Int) {
+class Game (val players: Array[Player], val newScaleProbability: Int) {
 
   private val random = new Random
 
   private val letters = Buffer('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
-
-  val players: Array[Player] = Array.ofDim(playerAmount)
 
   var isOver = false
 
