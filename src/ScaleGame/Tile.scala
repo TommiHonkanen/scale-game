@@ -9,10 +9,18 @@ class Tile(val distance: Int) {
   var scale: Option[Scale] = None
 
   def totalWeight(): Int = {
-    if (this.scale.isEmpty) this.weights.length else this.scale.get.totalWeight()
+    if (this.scale.isEmpty) this.distance * this.weights.length else this.distance * this.scale.get.totalWeight()
   }
 
   def pointsForPlayer(player: Player): Int = {
-    if (this.weights.head.owner == player) this.weights.length else 0
+    try {
+      if (this.weights.head.owner == player) this.distance * this.weights.length else 0
+    } catch {
+      case e:IndexOutOfBoundsException => 0
+    }
+  }
+
+  override def toString = {
+    s"${this.distance}, ${this.weights}"
   }
 }

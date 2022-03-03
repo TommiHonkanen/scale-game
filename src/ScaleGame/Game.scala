@@ -9,7 +9,7 @@ class Game (val playerAmount: Int, val weightAmount: Int, val newScaleProbabilit
 
   val players: Array[Player] = Array.ofDim(playerAmount)
 
-  var isOver = true
+  var isOver = false
 
   val scales = Buffer[Scale]()
 
