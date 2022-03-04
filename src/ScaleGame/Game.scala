@@ -13,8 +13,6 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
   val scales = Buffer[Scale]()
 
-  var turn: Player = players(0)
-
   def addPlayer(symbol: Char, weightAmount: Int): Unit = {
     this.players(symbol.toInt - 97) = new Player(symbol, weightAmount)
   }
@@ -53,8 +51,30 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
     }
   }
 
-  def playTurn(player: Player): Unit = {
-    ???
+  def playTurn(player: Player, scale: Scale, side: Char, position: Int): Unit = {
+
+    var originalWeights = Buffer[Weight]()
+
+    if (side == 'L') {
+      originalWeights = scale.leftTiles(position - 1).weights.clone()
+    } else {
+      originalWeights = scale.rightTiles(position - 1).weights.clone()
+    }
+
+    scale.placeWeight(side, position, player)
+
+    if (this.scales.exists(!_.isBalanced())) {
+      println("Scale got out of balance!")
+      if (side == 'L') {
+        scale.leftTiles(position - 1).weights = originalWeights
+      } else {
+        scale.rightTiles(position - 1).weights = originalWeights
+      }
+    }
+
+    player.weightsLeft -= 1
+
+    if (random.nextInt(100) + 1 <= this.newScaleProbability) this.addScale()
   }
 }
 

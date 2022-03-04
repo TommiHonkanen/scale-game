@@ -5,9 +5,9 @@ import scala.collection.mutable.Map
 
 class Scale(val radius: Int, val symbol: Char) {
 
-  val leftTiles: Array[Tile] = Array.ofDim(radius)
+  var leftTiles: Array[Tile] = Array.ofDim(radius)
 
-  val rightTiles: Array[Tile] = Array.ofDim(radius)
+  var rightTiles: Array[Tile] = Array.ofDim(radius)
 
   def placeTiles(): Unit = {
     for (i <- 1 to radius) {

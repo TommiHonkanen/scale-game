@@ -36,8 +36,52 @@ object UI extends App {
     this.playGame(new Game(players, newScaleProbability))
   }
 
-  def playGame(game: Game) = {
-    ???
+  def playGame(g: Game) = {
+    val game = g
+
+    var players = game.players.toBuffer
+
+    var turn: Player = players.head
+
+    while (!game.isOver) {
+
+      this.drawGame()
+
+      println("Turn: " + turn)
+
+      var scaleSymbol = '.'
+
+      while (!game.scales.exists(_.symbol == scaleSymbol)) {
+        print("Enter scale symbol: ")
+        scaleSymbol = readChar()
+      }
+
+      val scale = game.scales.find(_.symbol == scaleSymbol).get
+
+      var side = '.'
+
+      while (side != 'L' || side != 'R') {
+        print("Enter side (L/R): ")
+        side = readChar()
+      }
+
+      var position = 0
+
+      while (position < 1 || position > scale.radius) {
+        print(s"Enter position ${0 - scale.radius}: ")
+        position = readInt()
+      }
+
+      game.playTurn(turn, scale, side, position)
+
+      players.dropInPlace(1)
+      if (players.nonEmpty) {
+        turn = players.head
+      } else {
+        players = game.players.toBuffer
+        turn = players.head
+      }
+    }
   }
 
   private def drawGame() = {

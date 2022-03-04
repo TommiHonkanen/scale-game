@@ -4,7 +4,7 @@ import scala.collection.mutable.Buffer
 
 class Tile(val distance: Int) {
 
-  val weights = Buffer[Weight]()
+  var weights = Buffer[Weight]()
 
   var scale: Option[Scale] = None
 
