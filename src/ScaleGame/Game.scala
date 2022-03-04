@@ -36,6 +36,7 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
           scale.leftTiles.foreach( tile =>
             if (tile.weights.isEmpty && tile.scale.isEmpty) {
               tile.scale = Some(new Scale(this.random.nextInt(10) + 1, symbol))
+              tile.scale.get.placeTiles()
               found = true
             }
           )
@@ -43,6 +44,7 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
           scale.rightTiles.foreach( tile =>
             if (tile.weights.isEmpty && tile.scale.isEmpty) {
               tile.scale = Some(new Scale(this.random.nextInt(10) + 1, symbol))
+              tile.scale.get.placeTiles()
               found = true
             }
           )
@@ -75,6 +77,8 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
     player.weightsLeft -= 1
 
     if (random.nextInt(100) + 1 <= this.newScaleProbability) this.addScale()
+
+    if (this.players.forall(_.weightsLeft == 0)) this.isOver = true
   }
 }
 

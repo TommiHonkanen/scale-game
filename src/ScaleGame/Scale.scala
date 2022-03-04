@@ -17,7 +17,17 @@ class Scale(val radius: Int, val symbol: Char) {
   }
 
   def totalWeight(): Int = {
-    this.leftWeight() + this.rightWeight()
+    val allTiles = leftTiles ++ rightTiles
+    var weight = 0
+
+    for (tile <- allTiles) {
+      if (tile.scale.isDefined) {
+        weight += tile.scale.get.totalWeight()
+      } else {
+        weight += tile.weights.length
+      }
+    }
+    weight
   }
 
   private def leftWeight(): Int = {
