@@ -1,5 +1,6 @@
 package ScaleGame
-import scala.io.StdIn.{readLine, readChar, readInt}
+import scala.collection.mutable.Buffer
+import scala.io.StdIn.{readChar, readInt, readLine}
 
 object UI extends App {
 
@@ -88,8 +89,60 @@ object UI extends App {
     ???
   }
 
-  private def drawScale() = {
-    ???
+  private def drawScale(verticalDisplacement: Int, height: Int, scale: Scale) = {
+    val allTiles = scale.leftTiles ++ scale.rightTiles
+    val weightHeight = allTiles.maxBy(_.weights.length).weights.length
+
+    val scaleLevels: Buffer[Array[String]] = Buffer[Array[String]]()
+
+    val platform = Buffer[String]()
+
+    platform += "<"
+
+    for (i <- scale.radius to 1 by -1) {
+      platform += i.toString
+      platform += "="
+    }
+
+    platform += scale.symbol.toString
+
+    for (i <- 1 to scale.radius) {
+      platform += "="
+      platform += i.toString
+    }
+
+    platform += ">"
+    scaleLevels += platform.toArray
+
+    for (i <- 0 until weightHeight) {
+
+      var weights: Array[String] = Array.ofDim(platform.length)
+      weights = weights.map(j => " ")
+
+      for (j <- scale.leftTiles) {
+        if (j.weights.length > i) {
+          weights(platform.indexOf(j.distance.toString)) = j.weights(i).owner.symbol.toString
+        }
+      }
+      for (j <- scale.rightTiles) {
+        if (j.weights.length > i) {
+          weights(platform.indexOf(j.distance.toString) + 4 * j.distance) = j.weights(i).owner.symbol.toString
+        }
+      }
+      scaleLevels.prepend(weights)
+    }
+
+    for (i <- 1 to height) {
+
+      var array: Array[String] = Array.ofDim(platform.length)
+      array = array.map(j => " ")
+
+      array(array.length / 2) = "*"
+
+      scaleLevels += array
+
+    }
+    scaleLevels
   }
 
   startGame()
