@@ -46,7 +46,7 @@ object UI extends App {
 
     while (!game.isOver) {
 
-      this.drawGame()
+      this.drawGame(game)
 
       println("Turn: " + turn)
 
@@ -85,11 +85,22 @@ object UI extends App {
     }
   }
 
-  private def drawGame() = {
-    ???
+  private def drawGame(game: Game) = {
+    val bottomScale = game.scales.head
+
+    val scales = game.scales.clone
+    scales -= bottomScale
+
+    var leftScaleAmount = 0
+    var rightScaleAmount = 0
+
+    scales.foreach(scale => {
+      if (scale.leftTiles.exists(_.scale.isDefined)) leftScaleAmount += 1
+      else if (scale.rightTiles.exists(_.scale.isDefined)) rightScaleAmount += 1
+    })
   }
 
-  private def drawScale(verticalDisplacement: Int, height: Int, scale: Scale) = {
+  private def drawScale(scale: Scale) = {
     val allTiles = scale.leftTiles ++ scale.rightTiles
     val weightHeight = allTiles.maxBy(_.weights.length).weights.length
 
@@ -122,17 +133,21 @@ object UI extends App {
       for (j <- scale.leftTiles) {
         if (j.weights.length > i) {
           weights(platform.indexOf(j.distance.toString)) = j.weights(i).owner.symbol.toString
+        } else if (j.scale.isDefined) {
+          weights(platform.indexOf(j.distance.toString)) = "*"
         }
       }
       for (j <- scale.rightTiles) {
         if (j.weights.length > i) {
           weights(platform.indexOf(j.distance.toString) + 4 * j.distance) = j.weights(i).owner.symbol.toString
+        } else if (j.scale.isDefined) {
+          weights(platform.indexOf(j.distance.toString) + 4 * j.distance) = "*"
         }
       }
       scaleLevels.prepend(weights)
     }
 
-    for (i <- 1 to height) {
+    for (i <- 1 to 2) {
 
       var array: Array[String] = Array.ofDim(platform.length)
       array = array.map(j => " ")
@@ -143,6 +158,41 @@ object UI extends App {
 
     }
     scaleLevels
+  }
+
+  private def drawTwoScales(scale1: Scale, scale2: Scale, distance: Int) = {
+
+    val scale1Array = drawScale(scale1)
+    val scale2Array = drawScale(scale2)
+
+    val weightDifference = scale1Array.length - scale2Array.length
+
+    if (weightDifference > 0) {
+      var emptyArray: Array[String] = Array.ofDim(scale2Array.head.length)
+      emptyArray = emptyArray.map(j => " ")
+
+      for (i <- 1 to weightDifference) {
+        scale2Array.prepend(emptyArray.clone)
+      }
+    } else if (weightDifference < 0) {
+      var emptyArray: Array[String] = Array.ofDim(scale1Array.head.length)
+      emptyArray = emptyArray.map(j => " ")
+
+      for (i <- 1 to weightDifference) {
+        scale1Array.prepend(emptyArray.clone)
+      }
+    }
+
+    var distanceArray: Array[String] = Array.ofDim(distance)
+    distanceArray = distanceArray.map(j => " ")
+
+    val twoScalesBuffer = Buffer[Array[String]]()
+
+    for (i <- scale1Array.indices) {
+      twoScalesBuffer += (scale1Array(i) ++ distanceArray.clone ++ scale2Array(i))
+    }
+
+    twoScalesBuffer
   }
 
   startGame()
