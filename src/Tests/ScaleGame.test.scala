@@ -50,7 +50,6 @@ class UnitTests {
   A.placeWeight('L', 2, c)
   A.placeWeight('R', 4, d)
 
-
   @Test def testTotalWeight(): Unit = {
     assertEquals(3, G.totalWeight())
     assertEquals(4, E.totalWeight())
@@ -80,8 +79,6 @@ class UnitTests {
     assertTrue(!B.isBalanced())
     assertTrue(A.isBalanced())
   }
-
-
 }
 
 
