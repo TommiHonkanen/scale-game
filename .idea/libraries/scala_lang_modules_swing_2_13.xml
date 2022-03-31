@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="scala.lang.modules.swing_2.13" type="repository">
+    <properties maven-id="org.scala-lang.modules:scala-swing_2.13:3.0.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/modules/scala-swing_2.13/3.0.0/scala-swing_2.13-3.0.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/scala-lang/scala-library/2.13.3/scala-library-2.13.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

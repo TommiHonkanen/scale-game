@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="scala-sdk-2.13.5" level="application" />
     <orderEntry type="library" name="junit" level="project" />
+    <orderEntry type="library" name="scala.lang.modules.swing_2.13" level="project" />
   </component>
 </module>
