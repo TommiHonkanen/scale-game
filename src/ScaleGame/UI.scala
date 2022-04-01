@@ -1,4 +1,7 @@
+/*
+
 package ScaleGame
+
 import scala.collection.mutable.Buffer
 import scala.io.StdIn.{readChar, readInt, readLine}
 
@@ -21,6 +24,8 @@ object UI extends App {
     }
 
     val players: Array[Player] = Array.ofDim(playerAmount)
+
+
 
     for (i <- 0 until playerAmount) {
       players(i) = new Player((97 + i).toChar, weightAmount)
@@ -197,3 +202,5 @@ object UI extends App {
 
   startGame()
 }
+
+ */

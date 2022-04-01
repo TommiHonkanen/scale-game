@@ -5,17 +5,21 @@ import scala.util.Random
 
 class Game (val players: Array[Player], val newScaleProbability: Int) {
 
-  private val random = new Random
+  val random = new Random
 
-  private val letters = Buffer('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
+  private val letters = Buffer('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
 
   var isOver = false
 
   val scales = Buffer[Scale]()
 
+  /*
+
   def addPlayer(symbol: Char, weightAmount: Int): Unit = {
     this.players(symbol.toInt - 97) = new Player(symbol, weightAmount)
   }
+
+   */
 
   def addScale(): Unit = {
     val symbol = this.letters.head

@@ -1,20 +1,30 @@
 package ScaleGame
 
-import java.awt.geom.Ellipse2D
 import scala.collection.mutable.Buffer
 import scala.swing.BorderPanel.Position._
-import scala.swing.event.{ButtonClicked, SelectionChanged}
-import java.awt.{BasicStroke, Color}
-import scala.swing.{BorderPanel, Button, ComboBox, Dimension, Frame, Graphics2D, GridPanel, ListView, MainFrame, Orientation, Panel, Rectangle, SimpleSwingApplication, SplitPane}
+import scala.swing.event.{ButtonClicked, SelectionChanged, ValueChanged}
+import java.awt.{BasicStroke, Color, Font}
+import scala.swing.{BorderPanel, Button, ComboBox, Dimension, Frame, Graphics2D, GridPanel, Label, ListView, MainFrame, Orientation, Panel, Rectangle, SimpleSwingApplication, Slider, SplitPane}
 
 object GUI extends SimpleSwingApplication {
 
+  val players = Array(new Player(Color.GREEN, 20), new Player(Color.RED, 20), new Player(Color.ORANGE, 20), new Player(Color.BLUE, 20))
 
-  val players = Array(new Player('a', 20), new Player('b', 20))
+  var game: Game = new Game(players, 20)
 
-  val newScaleProbability = 50
+  val firstScale = new Scale(game.random.nextInt(5) + 6, 'A')
 
-  val game = new Game(players, newScaleProbability)
+  firstScale.placeTiles()
+
+  game.scales += firstScale
+
+  var turn = players.head
+
+  /*
+
+  val newScaleProbability1 = 50
+
+  val game = new Game(players, newScaleProbability1)
 
   val testScale = new Scale(5, 'A')
 
@@ -40,6 +50,11 @@ object GUI extends SimpleSwingApplication {
 
   testScale3.placeWeight('R', 1, players(0))
 
+  var gameStarted = false
+
+   */
+
+  var gameStarted = false
 
   def top = new MainFrame {
     title = "Scale Game"
@@ -52,52 +67,168 @@ object GUI extends SimpleSwingApplication {
       listenTo(selection)
 
       reactions += {
-        case e:SelectionChanged => { currentScale = game.scales.find(_.symbol == selection.item).get }
+        case e:SelectionChanged => {
+
+          currentScale = game.scales.find(_.symbol == selection.item).get
+          distance.max = currentScale.radius
+
+        }
       }
     }
 
-    def freeSides() = {
-      val sides: Buffer[Char] = Buffer()
+    var currentSide = 'L'
 
-      if (currentScale.leftTiles.exists(_.scale.isEmpty)) sides += 'L'
-      if (currentScale.rightTiles.exists(_.scale.isEmpty)) sides += 'R'
+    val sides = Array('L', 'R')
 
-      sides
-    }
 
-    var currentSide = freeSides().head
-
-    val side = new ComboBox(freeSides()) {
+    var side = new ComboBox(sides) {
       listenTo(selection)
 
       reactions += {
-        case e:SelectionChanged => { currentSide = selection.item }
+        case e:SelectionChanged => {
+
+          currentSide = selection.item
+
+        }
       }
     }
 
-    def freeTiles() = {
-      if (currentSide == 'L') currentScale.leftTiles.filter(_.scale.isEmpty).map(_.distance)
-      else currentScale.rightTiles.filter(_.scale.isEmpty).map(_.distance)
-    }
+    var currentDistance = 1
 
-    var currentDistance = freeTiles().head
+    val distance = new Slider {
+      orientation = Orientation.Horizontal
+      min = 1
+      max = currentScale.radius
+      value = 1
+      majorTickSpacing = 1
+      minorTickSpacing = 1
+      paintTicks = true
+      paintLabels = true
+      snapToTicks = true
 
-    val distance = new ComboBox(freeTiles()) {
-      listenTo(selection)
+      listenTo(this)
 
       reactions += {
-        case e:SelectionChanged => { currentDistance = selection.item }
+        case e:ValueChanged => { currentDistance = this.value }
       }
-    }
-
-    val button = new Button("Submit") {
 
     }
 
+    var currentPlayerAmount = 1
 
-    class ScalePanel extends Panel {
+    val playerAmount = new Slider {
+      orientation = Orientation.Horizontal
+      min = 1
+      max = 4
+      value = 1
+      majorTickSpacing = 1
+      minorTickSpacing = 1
+      paintTicks = true
+      paintLabels = true
+      snapToTicks = true
 
-      val width = 1440
+      listenTo(this)
+
+      reactions += {
+        case e:ValueChanged => { currentPlayerAmount = this.value }
+      }
+
+    }
+
+    var currentWeightAmount = 1
+
+    val weightAmount = new Slider {
+      orientation = Orientation.Horizontal
+      min = 1
+      max = 20
+      value = 1
+      majorTickSpacing = 1
+      minorTickSpacing = 1
+      paintTicks = true
+      paintLabels = true
+      snapToTicks = true
+
+      listenTo(this)
+
+      reactions += {
+        case e:ValueChanged => { currentWeightAmount = this.value }
+      }
+
+    }
+
+    var currentNewScaleProbability = 0
+
+    val newScaleProbability = new Slider {
+      orientation = Orientation.Horizontal
+      min = 0
+      max = 100
+      value = 1
+      majorTickSpacing = 5
+      minorTickSpacing = 1
+      paintTicks = true
+      paintLabels = true
+      snapToTicks = true
+
+      listenTo(this)
+
+      reactions += {
+        case e:ValueChanged => { currentNewScaleProbability = this.value }
+      }
+
+    }
+
+    val startGame = Button("Start Game") {
+      // gameStarted = true
+
+      contents = new BorderPanel {
+      layout += new GridPanel(2, 4) {
+        contents += new Label("Select scale")
+        contents += new Label("Select side")
+        contents += new Label("Select distance")
+        contents += new Label("Press to play turn")
+        contents += scaleList
+        contents += side
+        contents += distance
+        contents += submitButton
+      } -> North
+
+      layout += ScalePanel -> Center
+    }
+
+      size = new Dimension(1600, 1000)
+
+      players.foreach(_.weightsLeft = currentWeightAmount)
+
+      game = new Game(players.take(currentPlayerAmount), currentNewScaleProbability)
+
+      game.scales += firstScale
+    }
+
+    val submitButton = Button("Submit") {
+      println(currentScale.symbol)
+      println(currentSide)
+      println(currentDistance)
+
+      val testScale4 = new Scale(6, 'D')
+
+      testScale4.placeTiles()
+
+      //testScale3.leftTiles(0).scale = Option(testScale4)
+
+      ScalePanel.visible = false
+
+      ScalePanel.repaint
+
+      ScalePanel.visible = true
+
+      println(game.newScaleProbability)
+      println(game.players.length)
+      println(game.players.head.weightsLeft)
+    }
+
+    val ScalePanel = new Panel {
+
+      val width = 1600
       val height = 900
       val squareWidth = 20
 
@@ -112,6 +243,10 @@ object GUI extends SimpleSwingApplication {
             g.fill(newRect)
             upperRect = newRect
           }
+
+          g.setColor(Color.WHITE)
+          g.drawString(scale.symbol.toString, upperRect.x + this.squareWidth / 3, upperRect.y + this.squareWidth)
+          g.setColor(Color.BLACK)
 
           val leftTileSquares: Buffer[Rectangle] = Buffer()
           val rightTileSquares: Buffer[Rectangle] = Buffer()
@@ -129,7 +264,7 @@ object GUI extends SimpleSwingApplication {
               paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
-                g.setColor(Color.GREEN)
+                g.setColor(tile.weights.head.owner.color)
                 g.fillOval(rect.x, rect.y - i * rect.y, this.squareWidth, this.squareWidth)
               }
             }
@@ -148,39 +283,56 @@ object GUI extends SimpleSwingApplication {
               paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
-                g.setColor(Color.GREEN)
+                g.setColor(tile.weights.head.owner.color)
                 g.fillOval(rect.x, rect.y - i *  this.squareWidth, this.squareWidth, this.squareWidth)
               }
             }
           }
 
         }
-        /*
-        g.setColor(Color.GREEN)
-        g.fillRect(0, height + squareWidth, 99999, squareWidth)
-        g.setColor(Color.BLACK)
-        g.fill(new Rectangle(this.width / 2 - this.squareWidth / 2, this.height, this.squareWidth, this.squareWidth))
-        g.fillRect(this.width / 2 - this.squareWidth / 2, this.height - squareWidth, this.squareWidth, this.squareWidth)
-        g.fillRect(this.width / 2 - this.squareWidth / 2, this.height - squareWidth, this.squareWidth, this.squareWidth)
-        */
 
-        paintScale(testScale, this.width / 2, this.height / 2, 3)
+        paintScale(game.scales.head, this.width / 2, this.height - 100, 2 )
+
+
+        val points = game.scales.head.pointsPerPlayer(game.players).toArray
+
+        g.setColor(Color.BLACK)
+        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20))
+        g.drawString("Points:", 50, this.height - 185)
+        g.drawString("Weights left:", 225, this.height - 185)
+        g.drawString("Turn: Player " + (game.players.indexOf(turn) + 1) + "(" + turn + ")", this.width / 2 - 90, this.height - 50)
+
+        for (player <- points) {
+          g.setColor(player._1.color)
+          g.drawString(player._1 + ": " + player._2, 50, points.indexOf(player) * 20 + this.height - 150)
+          g.drawString(player._1 + ": " + player._1.weightsLeft, 225, points.indexOf(player) * 20 + this.height - 150)
+        }
+
+
       }
       preferredSize = new Dimension(this.width, this.height)
     }
 
-    contents = new BorderPanel {
-      layout += new GridPanel(1, 4) {
-        contents += scaleList
-        contents += side
-        contents += distance
-        contents += button
 
-      } -> North
-      layout += new ScalePanel -> Center
+
+    if (!gameStarted) {
+      contents = new GridPanel(7, 1) {
+        contents += new Label("Select player amount")
+        contents += playerAmount
+        contents += new Label("Select new scale probability")
+        contents += newScaleProbability
+        contents += new Label("Select weight amount")
+        contents += weightAmount
+        contents += startGame
+      }
+      size = new Dimension(720, 1000)
     }
 
-    size = new Dimension(1440, 1000)
+
+
+
+
+    // size = new Dimension(1440, 1000)
     centerOnScreen()
 
   }

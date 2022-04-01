@@ -2,11 +2,16 @@ package Tests
 
 import org.junit.Test
 import org.junit.Assert._
+
 import scala.collection.mutable.Map
-import ScaleGame.{Scale, Player}
+import ScaleGame.{Player, Scale}
+
+import java.awt.Color
 
 
 class UnitTests {
+
+  val players1 = Array(new Player(Color.GREEN, 99), new Player(Color.RED, 99), new Player(Color.GREEN, 99), new Player(Color.BLUE, 99))
 
   val A = new Scale(4, 'A')
   val B = new Scale(2, 'B')
@@ -23,10 +28,10 @@ class UnitTests {
   F.placeTiles()
   G.placeTiles()
 
-  val a = new Player('a', 99)
-  val b = new Player('b', 99)
-  val c = new Player('c', 99)
-  val d = new Player('d', 99)
+  val a = players1(0)
+  val b = players1(1)
+  val c = players1(2)
+  val d = players1(3)
 
   val players = Array(a, b, c, d)
 
