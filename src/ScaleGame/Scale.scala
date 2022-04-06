@@ -52,9 +52,12 @@ class Scale(val radius: Int, val symbol: Char) {
     }
   }
 
-  def weightHeight(): Int = {
-    val allTiles = this.leftTiles ++ this.rightTiles
-    allTiles.maxBy(_.weights.length).weights.length
+  def leftHeight() = {
+    leftTiles.maxBy(_.weights.length).weights.length
+  }
+
+  def rightHeight() = {
+    rightTiles.maxBy(_.weights.length).weights.length
   }
 
   def pointsPerPlayer(players: Array[Player]): Map[Player, Int] = {

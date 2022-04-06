@@ -8,9 +8,9 @@ import scala.swing.{BorderPanel, Button, ComboBox, Dimension, Frame, Graphics2D,
 
 object GUI extends SimpleSwingApplication {
 
-  val players = Array(new Player(Color.GREEN, 20), new Player(Color.RED, 20), new Player(Color.ORANGE, 20), new Player(Color.BLUE, 20))
+  var players = Buffer(new Player(Color.GREEN, 20), new Player(Color.RED, 20), new Player(Color.ORANGE, 20), new Player(Color.BLUE, 20))
 
-  var game: Game = new Game(players, 20)
+  var game: Game = new Game(players.toArray, 20)
 
   val firstScale = new Scale(game.random.nextInt(5) + 6, 'A')
 
@@ -59,11 +59,11 @@ object GUI extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Scale Game"
 
-    val freeScales = game.scales.filter(scale => scale.leftTiles.exists(_.scale.isEmpty) || scale.rightTiles.exists(_.scale.isEmpty)).map(_.symbol)
+    // val freeScales = game.scales.filter(scale => scale.leftTiles.exists(_.scale.isEmpty) || scale.rightTiles.exists(_.scale.isEmpty)).map(_.symbol)
 
-    var currentScale = game.scales.find(_.symbol == freeScales.head).get
+    var currentScale = firstScale
 
-    val scaleList = new ComboBox(freeScales) {
+    var scaleList = new ComboBox(game.scales.map(_.symbol)) {
       listenTo(selection)
 
       reactions += {
@@ -75,6 +75,22 @@ object GUI extends SimpleSwingApplication {
         }
       }
     }
+
+    def updateScaleList() = {
+      scaleList = new ComboBox(game.scales.map(_.symbol)) {
+      listenTo(selection)
+
+      reactions += {
+        case e:SelectionChanged => {
+
+          currentScale = game.scales.find(_.symbol == selection.item).get
+          distance.max = currentScale.radius
+
+        }
+      }
+     }
+    }
+
 
     var currentSide = 'L'
 
@@ -161,7 +177,7 @@ object GUI extends SimpleSwingApplication {
     val newScaleProbability = new Slider {
       orientation = Orientation.Horizontal
       min = 0
-      max = 100
+      max = 50
       value = 1
       majorTickSpacing = 5
       minorTickSpacing = 1
@@ -177,8 +193,9 @@ object GUI extends SimpleSwingApplication {
 
     }
 
-    val startGame = Button("Start Game") {
-      // gameStarted = true
+    def updateContent(): Unit = {
+
+      this.updateScaleList()
 
       contents = new BorderPanel {
       layout += new GridPanel(2, 4) {
@@ -193,37 +210,87 @@ object GUI extends SimpleSwingApplication {
       } -> North
 
       layout += ScalePanel -> Center
+     }
     }
+
+    val startGame = Button("Start Game") {
+      gameStarted = true
+
+      this.updateContent()
 
       size = new Dimension(1600, 1000)
 
+      players = players.take(currentPlayerAmount)
+
       players.foreach(_.weightsLeft = currentWeightAmount)
 
-      game = new Game(players.take(currentPlayerAmount), currentNewScaleProbability)
+      game = new Game(players.clone.toArray, currentNewScaleProbability)
 
       game.scales += firstScale
     }
 
-    val submitButton = Button("Submit") {
+
+
+    val submitButton = Button("Play turn") {
       println(currentScale.symbol)
       println(currentSide)
       println(currentDistance)
 
-      val testScale4 = new Scale(6, 'D')
+      // game.playTurn(turn, currentScale, currentSide, currentDistance)
 
-      testScale4.placeTiles()
+      println(turn)
+      println(currentScale)
+      println(currentSide)
+      println(currentDistance)
+      println(game.scales)
 
-      //testScale3.leftTiles(0).scale = Option(testScale4)
+      // currentScale.placeWeight(currentSide, currentDistance, turn)
+
+       if (currentSide == 'L') {
+          if (currentScale.leftTiles(currentDistance - 1).scale.isEmpty) {
+            game.playTurn(turn, currentScale, currentSide, currentDistance)
+
+            players.dropInPlace(1)
+
+            if (players.nonEmpty) {
+              turn = players.head
+            } else {
+              players = game.players.toBuffer
+              turn = players.head
+            }
+          }
+        } else {
+          if (currentScale.rightTiles(currentDistance - 1).scale.isEmpty) {
+            game.playTurn(turn, currentScale, currentSide, currentDistance)
+
+            players.dropInPlace(1)
+
+            if (players.nonEmpty) {
+              turn = players.head
+            } else {
+              players = game.players.toBuffer
+              turn = players.head
+            }
+          }
+        }
+
+
+
+
+
+      //val testScale2 = new Scale(3, 'B')
+
+      //testScale2.placeTiles()
+      //game.scales.head.leftTiles(2).scale = Option(testScale2)
+      //game.scales += testScale2
+
+      this.updateContent()
 
       ScalePanel.visible = false
 
       ScalePanel.repaint
 
       ScalePanel.visible = true
-
-      println(game.newScaleProbability)
-      println(game.players.length)
-      println(game.players.head.weightsLeft)
     }
 
     val ScalePanel = new Panel {
@@ -261,11 +328,11 @@ object GUI extends SimpleSwingApplication {
             leftTileSquares += rect
 
             if (tile.scale.nonEmpty) {
-              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
+              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.leftHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
                 g.setColor(tile.weights.head.owner.color)
-                g.fillOval(rect.x, rect.y - i * rect.y, this.squareWidth, this.squareWidth)
+                g.fillOval(rect.x, rect.y - i *  this.squareWidth, this.squareWidth, this.squareWidth)
               }
             }
 
@@ -280,7 +347,7 @@ object GUI extends SimpleSwingApplication {
             rightTileSquares += rect
 
             if (tile.scale.nonEmpty) {
-              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
+              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.rightHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
                 g.setColor(tile.weights.head.owner.color)
