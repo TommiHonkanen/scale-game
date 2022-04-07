@@ -1,12 +1,16 @@
 package ScaleGame
 
-import java.awt.Color
-
+/**
+ * Player objects represent the individual players of the game
+ * Each player is identified uniquely with a color
+ *
+ * @param color the color of this player
+ * @param weightAmount the initial amount of weights for this player
+ */
 class Player(val color: java.awt.Color, weightAmount: Int) {
 
+  // Keeps track of how many weights this player has left
   var weightsLeft = weightAmount
-
-  var points: Int = 0
 
   override def toString = {
     this.color match {
@@ -15,7 +19,6 @@ class Player(val color: java.awt.Color, weightAmount: Int) {
       case java.awt.Color.ORANGE => "Orange"
       case java.awt.Color.BLUE => "Blue"
     }
-
   }
 
 }

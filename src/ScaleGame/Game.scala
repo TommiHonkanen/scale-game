@@ -3,140 +3,92 @@ package ScaleGame
 import scala.collection.mutable.Buffer
 import scala.util.Random
 
+/**
+ * Each game is represented by a game object
+ * It keeps track of all the scales and handles major functions of the game
+ *
+ * @param players an array containing the players that take a part in this game
+ * @param newScaleProbability the probability of a new scale spawning after a round
+ */
 class Game (val players: Array[Player], val newScaleProbability: Int) {
 
-  var random = new Random(System.nanoTime)
+  // Holds the symbol that will be used for the next new scale
+  private var symbol = 'B'
 
-  private val letters = Buffer('B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z')
-
+  // Becomes true when every player has used all weights
   var isOver = false
 
+  // Holds all the scales that are currently in the game
   val scales = Buffer[Scale]()
 
-  def addScale(): Unit = {
+  // Adds a new scale on a random scale that is already in the game
+  // Each scale can hold at most two scales, one on the left side and one on the right side
+  private def addScale(): Unit = {
 
+    // Random for choosing a random scale in addScale
     val random = new Random(System.nanoTime)
 
-    /*
-    val chosenScale = this.random.shuffle(scales).find( scale =>
-      (scale == this.scales.head && ((scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) || (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)))) ||
-      ((scale.leftTiles.forall(_.scale.isEmpty) && scale.rightTiles.forall(_.scale.isEmpty)) && (scale.leftTiles.exists(_.weights.isEmpty) || scale.rightTiles.exists(_.weights.isEmpty)))
-    )
-
-    if (chosenScale.isDefined) {
-
-    val scale = chosenScale.get
-
-    var chosenTile = scale.leftTiles.head
-
-      if (random.nextInt(2) == 1) {
-        if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
-          chosenTile = this.random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
-        } else {
-          chosenTile = this.random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
-        }
-      } else {
-        if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
-          chosenTile = this.random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
-        } else {
-          chosenTile = this.random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
-        }
-      }
-      */
-
-      val chosenScale = this.random.shuffle(scales).find( scale =>
+    // Finds a scale that doesn't already have a scale on both sides and has a free tile
+    val chosenScale = random.shuffle(scales).find( scale =>
       (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) ||
       (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty))
     )
 
+    // Only continue if a scale was found
     if (chosenScale.isDefined) {
 
     val scale = chosenScale.get
 
     var chosenTile = scale.leftTiles.head
 
+      // Finds a random free tile on which to place the scale and assigns it to chosenTile
       if (random.nextInt(2) == 1) {
         if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
-          chosenTile = this.random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
+          chosenTile = random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
         } else {
-          chosenTile = this.random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
+          chosenTile = random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
         }
       } else {
         if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
-          chosenTile = this.random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
+          chosenTile = random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
         } else {
-          chosenTile = this.random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
+          chosenTile = random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
         }
       }
 
-
-      val symbol = this.letters.head
-      this.letters.dropInPlace(1)
-
+      // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions
       val radius = Math.max(random.nextInt(chosenTile.distance), 1)
 
+      // Creates the new scale
       val newScale = new Scale(radius, symbol)
-
       newScale.placeTiles()
 
+      // Adds the new scale to the game
       chosenTile.scale = Option(newScale)
-
       this.scales += newScale
-
-
-
     }
-
-
-    /*
-
-
-     */
-
-
-    /*
-
-
-    if (scales.isEmpty) {
-      scales += new Scale(this.random.nextInt(10) + 1, symbol)
-    } else {
-      val scale = this.random.shuffle(scales)
-                             .find(scale => (scale.leftTiles
-                             .exists(tile => tile.weights.isEmpty && tile.scale.isEmpty) || (scale.rightTiles
-                             .exists(tile => tile.weights.isEmpty && tile.scale.isEmpty)))).get
-      val side = if (this.random.nextInt(2) == 0) 'L' else 'R'
-      var found = false
-
-      while (!found) {
-        if (side == 'L') {
-          scale.leftTiles.foreach( tile =>
-            if (tile.weights.isEmpty && tile.scale.isEmpty) {
-              tile.scale = Some(new Scale(this.random.nextInt(10) + 1, symbol))
-              tile.scale.get.placeTiles()
-              found = true
-            }
-          )
-        } else {
-          scale.rightTiles.foreach( tile =>
-            if (tile.weights.isEmpty && tile.scale.isEmpty) {
-              tile.scale = Some(new Scale(this.random.nextInt(10) + 1, symbol))
-              tile.scale.get.placeTiles()
-              found = true
-            }
-          )
-        }
-      }
-    }
-    */
   }
 
+  /**
+   * Plays a turn in the game by placing the weight and determining if the scales got out of balance or not
+   *
+   * @param player the player whose turn it is
+   * @param scale the scale that the weight will be attempted to placed on
+   * @param side the side of the scale that the weight will be placed on ('L' or 'R')
+   * @param position the distance from the center of the scale that the weight will be placed on
+   * @return true if a scale got out of balance and false if the weight was placed successfully
+   */
   def playTurn(player: Player, scale: Scale, side: Char, position: Int): Boolean = {
 
+    // Random for choosing the radius of the potential new scale
+    val random = new Random(System.nanoTime)
+
+    // Becomes true if the scales got out of balance
     var failed = false
 
     var originalWeights = Buffer[Weight]()
 
-
+    // Save a copy of the potential weights already on the chosen tile into originalWeights
     if (side == 'L') {
         originalWeights = scale.leftTiles(position - 1).weights.clone()
       } else {
@@ -145,21 +97,22 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
       var originalOwner: Player = null
 
+      // Determine if the tile already has weights and store the owner of those weights into originalOwner
       if (originalWeights.nonEmpty) {
         originalOwner = originalWeights.head.owner
       }
 
+      // Attempt to place the weight
       scale.placeWeight(side, position, player)
 
+      // If the scales got out of balance, remove the weight that was placed and restore the owner of those weights
       if (this.scales.exists(!_.isBalanced())) {
-        println("Scale got out of balance!")
         failed = true
         if (side == 'L') {
           scale.leftTiles(position - 1).weights = originalWeights
           if (originalWeights.nonEmpty) {
             scale.leftTiles(position - 1).weights.foreach(_.owner = originalOwner)
           }
-
         } else {
           scale.rightTiles(position - 1).weights = originalWeights
           if (originalWeights.nonEmpty) {
@@ -168,10 +121,16 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
         }
       }
 
+    // Decrease the number of weights the player has left by one regardless of if the placing of the weight was successful or not
     player.weightsLeft -= 1
 
-    if (random.nextInt(100) + 1 <= this.newScaleProbability) this.addScale()
+    // Determine if a new scale will be added
+    if ((random.nextInt(100) + 1 <= this.newScaleProbability) && (player == players.last)) {
+      this.addScale()
+      symbol = (symbol + 1).toChar
+    }
 
+    // Determine if all players have run out of weights
     if (this.players.forall(_.weightsLeft == 0)) this.isOver = true
 
     failed

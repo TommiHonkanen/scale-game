@@ -8,11 +8,14 @@ import ScaleGame.{Player, Scale}
 
 import java.awt.Color
 
-
+// Tests the most important methods of the game
 class UnitTests {
 
+  // Holds the players
   val players1 = Array(new Player(Color.GREEN, 99), new Player(Color.RED, 99), new Player(Color.GREEN, 99), new Player(Color.BLUE, 99))
 
+
+  // Scales used for the tests
   val A = new Scale(4, 'A')
   val B = new Scale(2, 'B')
   val C = new Scale(2, 'C')
@@ -35,6 +38,7 @@ class UnitTests {
 
   val players = Array(a, b, c, d)
 
+  // Places the scales on top of each other
   A.rightTiles(2).scale = Some(B)
   A.leftTiles(3).scale = Some(C)
   B.rightTiles(1).scale = Some(D)
@@ -42,6 +46,7 @@ class UnitTests {
   D.leftTiles(0).scale = Some(F)
   E.rightTiles(1).scale = Some(G)
 
+  // Places some weights on the scales
   G.placeWeight('R', 1, a)
   G.placeWeight('R', 1, a)
   G.placeWeight('L', 1, b)
@@ -55,6 +60,7 @@ class UnitTests {
   A.placeWeight('L', 2, c)
   A.placeWeight('R', 4, d)
 
+  // Tests the totalWeight method
   @Test def testTotalWeight(): Unit = {
     assertEquals(3, G.totalWeight())
     assertEquals(4, E.totalWeight())
@@ -65,6 +71,7 @@ class UnitTests {
     assertEquals(12, A.totalWeight())
   }
 
+  // Tests the pointsPerPlayer method
   @Test def testPointsPerPlayer(): Unit = {
     assertEquals(G.pointsPerPlayer(players), Map(a -> 2, b -> 1, c -> 0, d -> 0))
     assertEquals(E.pointsPerPlayer(players), Map(a -> 4, b -> 2, c -> 1, d -> 0))
@@ -75,6 +82,7 @@ class UnitTests {
     assertEquals(A.pointsPerPlayer(players), Map(a -> 38, b -> 22, c -> 16, d -> 27))
   }
 
+  // Tests the isBalanced method
   @Test def TestIsBalanced(): Unit = {
     assertTrue(G.isBalanced())
     assertTrue(!E.isBalanced())
