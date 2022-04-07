@@ -20,41 +20,11 @@ object GUI extends SimpleSwingApplication {
 
   var turn = players.head
 
-  /*
-
-  val newScaleProbability1 = 50
-
-  val game = new Game(players, newScaleProbability1)
-
-  val testScale = new Scale(5, 'A')
-
-  val testScale2 = new Scale(3, 'B')
-
-  val testScale3 = new Scale(1, 'C')
-
-  testScale.placeTiles()
-
-  testScale2.placeTiles()
-
-  testScale3.placeTiles()
-
-  game.scales += testScale
-
-  game.scales += testScale2
-
-  game.scales += testScale3
-
-  testScale.leftTiles(2).scale = Option(testScale2)
-
-  testScale2.rightTiles(1).scale = Option(testScale3)
-
-  testScale3.placeWeight('R', 1, players(0))
-
   var gameStarted = false
 
-   */
+  var gotOutOfBalance = false
 
-  var gameStarted = false
+  var invalidInput = false
 
   def top = new MainFrame {
     title = "Scale Game"
@@ -82,15 +52,12 @@ object GUI extends SimpleSwingApplication {
 
       reactions += {
         case e:SelectionChanged => {
-
           currentScale = game.scales.find(_.symbol == selection.item).get
           distance.max = currentScale.radius
-
         }
       }
      }
     }
-
 
     var currentSide = 'L'
 
@@ -213,6 +180,10 @@ object GUI extends SimpleSwingApplication {
      }
     }
 
+    def addEndScreen() = {
+      contents = ScalePanel
+    }
+
     val startGame = Button("Start Game") {
       gameStarted = true
 
@@ -229,26 +200,11 @@ object GUI extends SimpleSwingApplication {
       game.scales += firstScale
     }
 
-
-
     val submitButton = Button("Play turn") {
-      println(currentScale.symbol)
-      println(currentSide)
-      println(currentDistance)
-
-      // game.playTurn(turn, currentScale, currentSide, currentDistance)
-
-      println(turn)
-      println(currentScale)
-      println(currentSide)
-      println(currentDistance)
-      println(game.scales)
-
-      // currentScale.placeWeight(currentSide, currentDistance, turn)
 
        if (currentSide == 'L') {
           if (currentScale.leftTiles(currentDistance - 1).scale.isEmpty) {
-            game.playTurn(turn, currentScale, currentSide, currentDistance)
+            gotOutOfBalance = game.playTurn(turn, currentScale, currentSide, currentDistance)
 
             players.dropInPlace(1)
 
@@ -258,10 +214,12 @@ object GUI extends SimpleSwingApplication {
               players = game.players.toBuffer
               turn = players.head
             }
+          } else {
+            invalidInput = true
           }
         } else {
           if (currentScale.rightTiles(currentDistance - 1).scale.isEmpty) {
-            game.playTurn(turn, currentScale, currentSide, currentDistance)
+            gotOutOfBalance = game.playTurn(turn, currentScale, currentSide, currentDistance)
 
             players.dropInPlace(1)
 
@@ -271,20 +229,15 @@ object GUI extends SimpleSwingApplication {
               players = game.players.toBuffer
               turn = players.head
             }
+          } else {
+            invalidInput = true
           }
         }
 
+      if (!game.isOver) this.updateContent() else this.addEndScreen()
 
 
 
-
-      //val testScale2 = new Scale(3, 'B')
-
-      //testScale2.placeTiles()
-      //game.scales.head.leftTiles(2).scale = Option(testScale2)
-      //game.scales += testScale2
-
-      this.updateContent()
 
       ScalePanel.visible = false
 
@@ -367,7 +320,7 @@ object GUI extends SimpleSwingApplication {
         g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20))
         g.drawString("Points:", 50, this.height - 185)
         g.drawString("Weights left:", 225, this.height - 185)
-        g.drawString("Turn: Player " + (game.players.indexOf(turn) + 1) + "(" + turn + ")", this.width / 2 - 90, this.height - 50)
+        if (!game.isOver) g.drawString("Turn: " + turn, this.width / 2 - 90, this.height - 50)
 
         for (player <- points) {
           g.setColor(player._1.color)
@@ -376,31 +329,46 @@ object GUI extends SimpleSwingApplication {
         }
 
 
+        if (invalidInput) {
+          g.setColor(Color.RED)
+          g.drawString("That tile has a scale on it", this.width - 400, this.height - 50)
+          invalidInput = false
+        }
+
+        if (gotOutOfBalance) {
+          g.setColor(Color.RED)
+          g.drawString("Scale got out of balance!", this.width - 400, this.height - 50)
+          gotOutOfBalance = false
+        }
+
+        if (game.isOver) {
+          g.setColor(Color.RED)
+          g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 40))
+          g.drawString("Game over!", this.width / 2 - 90, 70)
+          val winner = points.maxBy(_._2)
+          g.setColor(Color.BLACK)
+          if (points.exists(player => player._2 == winner._2 && player._1 != winner._1)) {
+            g.drawString("It's a tie!", this.width / 2 - 100, this.height - 40)
+          } else {
+            g.drawString(winner._1 + " wins!", this.width / 2 - 100, this.height - 40)
+          }
+        }
+
       }
       preferredSize = new Dimension(this.width, this.height)
     }
 
-
-
-    if (!gameStarted) {
-      contents = new GridPanel(7, 1) {
-        contents += new Label("Select player amount")
-        contents += playerAmount
-        contents += new Label("Select new scale probability")
-        contents += newScaleProbability
-        contents += new Label("Select weight amount")
-        contents += weightAmount
-        contents += startGame
-      }
-      size = new Dimension(720, 1000)
+    contents = new GridPanel(7, 1) {
+      contents += new Label("Select player amount")
+      contents += playerAmount
+      contents += new Label("Select new scale probability")
+      contents += newScaleProbability
+      contents += new Label("Select weight amount")
+      contents += weightAmount
+      contents += startGame
     }
 
-
-
-
-
-    // size = new Dimension(1440, 1000)
+    size = new Dimension(720, 1000)
     centerOnScreen()
-
   }
 }
