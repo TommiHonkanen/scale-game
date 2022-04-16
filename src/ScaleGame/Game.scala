@@ -30,42 +30,70 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
     // Finds a scale that doesn't already have a scale on both sides and has a free tile
     val chosenScale = random.shuffle(scales).find( scale =>
-      (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) ||
-      (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty))
+      (scale.radius != 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty) && scale.rightTiles(0).scale.isEmpty) ||
+      (scale.radius != 2 && scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty) && scale.leftTiles(0).scale.isEmpty) ||
+      // If the scale has a radius of one, it can only have a scale on one side
+      (scale.radius == 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.rightTiles.forall(_.scale.isEmpty) && (scale.leftTiles.exists(_.weights.isEmpty) || scale.rightTiles.exists(_.weights.isEmpty)))
     )
 
-    // Only continue if a scale was found
+    // Only continues if a scale was found
     if (chosenScale.isDefined) {
 
-    val scale = chosenScale.get
+      val scale = chosenScale.get
 
-    var chosenTile = scale.leftTiles.head
+      val leftScale = scale.leftTiles(0).scale
+
+      val rightScale = scale.rightTiles(0).scale
+
+      var chosenTile: Option[Tile] = None
 
       // Finds a random free tile on which to place the scale and assigns it to chosenTile
-      if (random.nextInt(2) == 1) {
-        if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
-          chosenTile = random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
+      if (scale.radius > 2) {
+        if (random.nextInt(2) == 1) {
+          if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
+            chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
+          } else {
+            chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
+          }
         } else {
-          chosenTile = random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
+          if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
+            chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
+          } else {
+            chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
+          }
         }
       } else {
-        if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
-          chosenTile = random.shuffle(scale.rightTiles.toBuffer).find(_.weights.isEmpty).get
+        if (random.nextInt(2) == 1) {
+          if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
+            chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => tile.weights.isEmpty).get)
+          } else {
+            chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => tile.weights.isEmpty).get)
+          }
         } else {
-          chosenTile = random.shuffle(scale.leftTiles.toBuffer).find(_.weights.isEmpty).get
+          if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
+            chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => tile.weights.isEmpty).get)
+          } else {
+            chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => tile.weights.isEmpty).get)
+          }
         }
       }
 
-      // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions
-      val radius = Math.max(random.nextInt(chosenTile.distance), 1)
+      // Only continues if a tile was found
+      if (chosenTile.isDefined) {
 
-      // Creates the new scale
-      val newScale = new Scale(radius, symbol)
-      newScale.placeTiles()
+        val tile = chosenTile.get
 
-      // Adds the new scale to the game
-      chosenTile.scale = Option(newScale)
-      this.scales += newScale
+        // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions
+        val radius = Math.max(random.nextInt(tile.distance), 2) // Math.max(tile.distance - 1, 2)
+
+        // Creates the new scale
+        val newScale = new Scale(radius, symbol)
+        newScale.placeTiles()
+
+        // Adds the new scale to the game
+        tile.scale = Option(newScale)
+        this.scales += newScale
+      }
     }
   }
 

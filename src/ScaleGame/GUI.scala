@@ -149,7 +149,7 @@ object GUI extends SimpleSwingApplication {
       orientation = Orientation.Horizontal
       min = 0
       max = 50
-      value = 1
+      value = 0
       majorTickSpacing = 5
       minorTickSpacing = 1
       paintTicks = true
@@ -192,6 +192,10 @@ object GUI extends SimpleSwingApplication {
 
     // Removes the unnecessary elements from the interface after the game has ended
     def addEndScreen() = {
+
+      invalidInput = false
+      gotOutOfBalance = false
+
       contents = ScalePanel
     }
 
@@ -256,7 +260,7 @@ object GUI extends SimpleSwingApplication {
 
       val width = 1600
       val height = 900
-      val squareWidth = 20 // The width of each square the scales consist of
+      val squareWidth = 25// The width of each square the scales consist of
 
       // Paints each component in the panel
       override def paintComponent(g: Graphics2D): Unit = {
@@ -278,7 +282,7 @@ object GUI extends SimpleSwingApplication {
 
           // Draws the leg of the scale
           for (i <- 0 to height) {
-            val newRect = new Rectangle(x, y - i * squareWidth, this.squareWidth, this.squareWidth)
+            val newRect = new Rectangle(x, y - i * this.squareWidth, this.squareWidth, this.squareWidth)
             g.fill(newRect)
             upperRect = newRect
           }
@@ -299,7 +303,7 @@ object GUI extends SimpleSwingApplication {
             // If the tile holds a scale, calls paintScale on it
             // If the tile holds weights, they're painted aswell
             if (tile.scale.nonEmpty) {
-              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.leftHeight() + 1, 2))
+              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
                 g.setColor(tile.weights.head.owner.color)
@@ -318,7 +322,7 @@ object GUI extends SimpleSwingApplication {
             g.draw(rect)
 
             if (tile.scale.nonEmpty) {
-              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.rightHeight() + 1, 2))
+              paintScale(tile.scale.get, rect.x, rect.y - this.squareWidth, math.max(scale.weightHeight() + 1, 2))
             } else if (tile.weights.nonEmpty) {
               for (i <- 1 to tile.weights.length) {
                 g.setColor(tile.weights.head.owner.color)

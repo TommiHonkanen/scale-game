@@ -1,6 +1,6 @@
 package ScaleGame
 
-import math.abs
+import math.{abs, max}
 import scala.collection.mutable.Map
 
 /**
@@ -74,13 +74,17 @@ class Scale(val radius: Int, val symbol: Char) {
   }
 
   // Places the current maximum height of weights on the left side of the scale
-  def leftHeight() = {
+  private def leftHeight() = {
     leftTiles.maxBy(_.weights.length).weights.length
   }
 
   // Places the current maximum height of weights on the right side of the scale
-  def rightHeight() = {
+  private def rightHeight() = {
     rightTiles.maxBy(_.weights.length).weights.length
+  }
+
+  def weightHeight() = {
+    max(this.leftHeight(), this.rightHeight())
   }
 
   /**
