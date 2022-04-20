@@ -1,7 +1,7 @@
 package ScaleGame
 
 import math.{abs, max}
-import scala.collection.mutable.Map
+import scala.collection.mutable.Buffer
 
 /**
  * Each scale is represented by a scale object
@@ -93,16 +93,13 @@ class Scale(val radius: Int, val symbol: Char) {
    * @param players an array containing the players whose points will be calculated
    * @return a Map in which each player in the players array is mapped to that player's total points on this scale
    */
-  def pointsPerPlayer(players: Array[Player]): Map[Player, Int] = {
+  def pointsPerPlayer(players: Array[Player]): Buffer[(Player, Int)] = {
 
     // Combines the tile arrays into one single array
     val allTiles = leftTiles ++ rightTiles
 
-    // Mutable Map that holds the Map that will be returned
-    val points = Map[Player, Int]()
-
-    // Sets every player's points to 0
-    players.foreach( player => points += (player -> 0) )
+    // Mutable Buffer that holds the Buffer that will be returned
+    val points = Buffer[(Player, Int)]()
 
     // Loops over the players and calculates the points for each player
     for(player <- players) {
@@ -117,11 +114,11 @@ class Scale(val radius: Int, val symbol: Char) {
         if (tile.scale.isEmpty) sum += tile.pointsForPlayer(player)
 
         // If the tile contains a scale, call this method on that scale and add the points on that scale (multiplied by the distance of this tile) to sum
-        else sum += tile.distance * tile.scale.get.pointsPerPlayer(Array(player))(player)
+        else sum += tile.distance * tile.scale.get.pointsPerPlayer(Array(player)).head._2
       )
 
       // Set the points for the current player
-      points(player) = sum
+      points.append((player, sum))
     }
     points
   }

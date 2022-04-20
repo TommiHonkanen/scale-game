@@ -3,7 +3,7 @@ package Tests
 import org.junit.Test
 import org.junit.Assert._
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.Buffer
 import ScaleGame.{Player, Scale}
 
 import java.awt.Color
@@ -13,7 +13,6 @@ class UnitTests {
 
   // Holds the players
   val players1 = Array(new Player(Color.GREEN, 99), new Player(Color.RED, 99), new Player(Color.GREEN, 99), new Player(Color.BLUE, 99))
-
 
   // Scales used for the tests
   val A = new Scale(4, 'A')
@@ -73,13 +72,13 @@ class UnitTests {
 
   // Tests the pointsPerPlayer method
   @Test def testPointsPerPlayer(): Unit = {
-    assertEquals(G.pointsPerPlayer(players), Map(a -> 2, b -> 1, c -> 0, d -> 0))
-    assertEquals(E.pointsPerPlayer(players), Map(a -> 4, b -> 2, c -> 1, d -> 0))
-    assertEquals(C.pointsPerPlayer(players), Map(a -> 8, b -> 4, c -> 2, d -> 2))
-    assertEquals(F.pointsPerPlayer(players), Map(a -> 0, b -> 0, c -> 1, d -> 2))
-    assertEquals(D.pointsPerPlayer(players), Map(a -> 0, b -> 1, c -> 1, d -> 2))
-    assertEquals(B.pointsPerPlayer(players), Map(a -> 2, b -> 2, c -> 2, d -> 5))
-    assertEquals(A.pointsPerPlayer(players), Map(a -> 38, b -> 22, c -> 16, d -> 27))
+    assertEquals(G.pointsPerPlayer(players), Buffer((a, 2), (b, 1), (c, 0), (d, 0)))
+    assertEquals(E.pointsPerPlayer(players), Buffer((a, 4), (b, 2), (c, 1), (d, 0)))
+    assertEquals(C.pointsPerPlayer(players), Buffer((a, 8), (b, 4), (c, 2), (d, 2)))
+    assertEquals(F.pointsPerPlayer(players), Buffer((a, 0), (b, 0), (c, 1), (d, 2)))
+    assertEquals(D.pointsPerPlayer(players), Buffer((a, 0), (b, 1), (c, 1), (d, 2)))
+    assertEquals(B.pointsPerPlayer(players), Buffer((a, 2), (b, 2), (c, 2), (d, 5)))
+    assertEquals(A.pointsPerPlayer(players), Buffer((a, 38), (b, 22), (c, 16), (d, 27)))
   }
 
   // Tests the isBalanced method

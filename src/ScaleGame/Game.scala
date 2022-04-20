@@ -32,7 +32,7 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
     val chosenScale = random.shuffle(scales).find( scale =>
       (scale.radius != 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty) && scale.rightTiles(0).scale.isEmpty) ||
       (scale.radius != 2 && scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty) && scale.leftTiles(0).scale.isEmpty) ||
-      // If the scale has a radius of one, it can only have a scale on one side
+      // If the scale has a radius of two, it can only have a scale on one side
       (scale.radius == 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.rightTiles.forall(_.scale.isEmpty) && (scale.leftTiles.exists(_.weights.isEmpty) || scale.rightTiles.exists(_.weights.isEmpty)))
     )
 
@@ -48,21 +48,22 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
       var chosenTile: Option[Tile] = None
 
       // Finds a random free tile on which to place the scale and assigns it to chosenTile
-      if (scale.radius > 2) {
+      if (scale.radius > 2) { // If the radius of the scale is greater than 2, then it can't have a scale on the closest tiles to the center
+        // If the random gives 1, places the scale on the left side
         if (random.nextInt(2) == 1) {
           if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
             chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           } else {
             chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           }
-        } else {
+        } else { // If the random gives 2, places the scale on the right side
           if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
             chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           } else {
             chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           }
         }
-      } else {
+      } else { // If the scale has a radius of 2, then it can have a scale on the closest tiles to the center
         if (random.nextInt(2) == 1) {
           if (scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) {
             chosenTile = Some(random.shuffle(scale.leftTiles.toBuffer).find(tile => tile.weights.isEmpty).get)
@@ -84,7 +85,7 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
         val tile = chosenTile.get
 
         // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions
-        val radius = Math.max(random.nextInt(tile.distance), 2) // Math.max(tile.distance - 1, 2)
+        val radius = Math.max(random.nextInt(tile.distance), 2) //  Math.max(tile.distance - 1, 2)
 
         // Creates the new scale
         val newScale = new Scale(radius, symbol)

@@ -10,26 +10,26 @@ import scala.util.Random
 object GUI extends SimpleSwingApplication {
 
   // Random for determining the radius of the first scale
-  val random = new Random(System.nanoTime)
+  private val random = new Random(System.nanoTime)
 
   // Initially holds all the possible players
-  var players = Buffer(new Player(Color.GREEN, 20), new Player(Color.RED, 20), new Player(Color.ORANGE, 20), new Player(Color.BLUE, 20))
+  private var players = Buffer(new Player(Color.GREEN, 20), new Player(Color.RED, 20), new Player(Color.ORANGE, 20), new Player(Color.BLUE, 20))
 
   // Is going to hold the game object
-  var game: Game = null
+  private var game: Game = null
 
   // Creates the first scale
-  val firstScale = new Scale(random.nextInt(5) + 6, 'A')
+  private val firstScale = new Scale(random.nextInt(5) + 8, 'A')
   firstScale.placeTiles()
 
   // Keeps track of whose turn it is
-  var turn = players.head
+  private var turn = players.head
 
   // Becomes true if a scale gets out of balance
-  var gotOutOfBalance = false
+  private var gotOutOfBalance = false
 
   // Becomes true if a player tries to place a weight on a tile that holds a scale
-  var invalidInput = false
+  private var invalidInput = false
 
   // Builds the actual interface
   def top = new MainFrame {
@@ -260,7 +260,7 @@ object GUI extends SimpleSwingApplication {
 
       val width = 1600
       val height = 900
-      val squareWidth = 25// The width of each square the scales consist of
+      val squareWidth = 20// The width of each square the scales consist of
 
       // Paints each component in the panel
       override def paintComponent(g: Graphics2D): Unit = {
@@ -336,19 +336,19 @@ object GUI extends SimpleSwingApplication {
         paintScale(game.scales.head, this.width / 2, this.height - 100, 2 )
 
         // Calculates the points for each player and stores them in a variable
-        val points = game.scales.head.pointsPerPlayer(game.players).toArray
+        val points = game.scales.head.pointsPerPlayer(game.players)
 
         g.setColor(Color.BLACK)
         g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 20))
-        g.drawString("Points:", 50, this.height - 185)
-        g.drawString("Weights left:", 225, this.height - 185)
-        if (!game.isOver) g.drawString("Turn: " + turn, this.width / 2 - 90, this.height - 50) // Paint the game over text if the game is over, otherwise display whose turn it is
+        g.drawString("Points:", 50, this.height - 150)
+        g.drawString("Weights left:", 225, this.height - 150)
+        if (!game.isOver) g.drawString("Turn: Player " + (game.players.indexOf(turn) + 1) + "(" + turn + ")", this.width / 2 - 100, this.height - 50) // If the game isn't over, display whose turn it is
 
         // Paints the points of each player
         for (player <- points) {
           g.setColor(player._1.color)
-          g.drawString(player._1 + ": " + player._2, 50, points.indexOf(player) * 20 + this.height - 150)
-          g.drawString(player._1 + ": " + player._1.weightsLeft, 225, points.indexOf(player) * 20 + this.height - 150)
+          g.drawString(player._1 + ": " + player._2, 50, points.indexOf(player) * 20 + this.height - 120)
+          g.drawString(player._1 + ": " + player._1.weightsLeft, 225, points.indexOf(player) * 20 + this.height - 120)
         }
 
         // If an invalid input was given, displays a text informing the player of that
@@ -360,14 +360,14 @@ object GUI extends SimpleSwingApplication {
         // If a scale got out of balance, displays a text informing the player of that
         if (gotOutOfBalance) {
           g.setColor(Color.RED)
-          g.drawString("Scale got out of balance!", this.width - 400, this.height - 50)
+          g.drawString("Scale(s) got out of balance!", this.width - 400, this.height - 50)
         }
 
         // If the game is over, determines the winner of the game and displays that player's color
         if (game.isOver) {
           g.setColor(Color.RED)
           g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 40))
-          g.drawString("Game over!", this.width / 2 - 90, 70)
+          g.drawString("Game over!", 60, 70)
           val winner = points.maxBy(_._2)
           g.setColor(Color.BLACK)
           if (points.exists(player => player._2 == winner._2 && player._1 != winner._1)) {
