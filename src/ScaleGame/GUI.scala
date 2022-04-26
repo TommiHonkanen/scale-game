@@ -66,9 +66,7 @@ object GUI extends SimpleSwingApplication {
       listenTo(selection)
 
       reactions += {
-        case e:SelectionChanged => {
-          currentSide = selection.item // Updates currentSide based on the selection
-        }
+        case e:SelectionChanged => { currentSide = selection.item } // Updates currentSide based on the selection
       }
     }
 
@@ -92,7 +90,6 @@ object GUI extends SimpleSwingApplication {
       reactions += {
         case e:ValueChanged => { currentDistance = this.value } // Saves the currently selected distance to currentDistance
       }
-
     }
 
     // Holds the currently selected player amount
@@ -115,7 +112,6 @@ object GUI extends SimpleSwingApplication {
       reactions += {
         case e:ValueChanged => { currentPlayerAmount = this.value } // Updates currentPlayerAmount based on the current selection
       }
-
     }
 
     // Holds the currently selected weight amount
@@ -138,7 +134,6 @@ object GUI extends SimpleSwingApplication {
       reactions += {
         case e:ValueChanged => { currentWeightAmount = this.value } // Updates currentWeightAmount based on the currently selected value
       }
-
     }
 
     // Holds the currently selected new scale probability
@@ -161,7 +156,6 @@ object GUI extends SimpleSwingApplication {
       reactions += {
         case e:ValueChanged => { currentNewScaleProbability = this.value } // Updates currentNewScaleProbability based on the current selection
       }
-
     }
 
     // Updates the interface to display all the new changes
@@ -173,25 +167,25 @@ object GUI extends SimpleSwingApplication {
 
       distance.max = firstScale.radius // Resets the maximum value of the distance slider to prevent it from displaying the radius of a wrong scale
 
-      // Updates the the contents to display changes
+      // Updates the contents to display changes
       contents = new BorderPanel {
-      layout += new GridPanel(2, 4) {
-        contents += new Label("Select scale")
-        contents += new Label("Select side")
-        contents += new Label("Select distance")
-        contents += new Label("Press to play turn")
-        contents += scaleList
-        contents += side
-        contents += distance
-        contents += submitButton
-      } -> North
-      layout += ScalePanel -> Center
-     }
+        layout += new GridPanel(2, 4) {
+          contents += new Label("Select scale")
+          contents += new Label("Select side")
+          contents += new Label("Select distance")
+          contents += new Label("Press to play turn")
+          contents += scaleList
+          contents += side
+          contents += distance
+          contents += submitButton
+        } -> North
+        layout += ScalePanel -> Center
+       }
       size = new Dimension(1600, 1000)
     }
 
     // Removes the unnecessary elements from the interface after the game has ended
-    def addEndScreen() = {
+    def addEndScreen(): Unit = {
 
       invalidInput = false
       gotOutOfBalance = false
@@ -222,7 +216,7 @@ object GUI extends SimpleSwingApplication {
           if (currentScale.leftTiles(currentDistance - 1).scale.isEmpty) {
             gotOutOfBalance = game.playTurn(turn, currentScale, currentSide, currentDistance) // gotOutOfBalance becomes true if a scale got out of balance after the weight was placed
 
-            // Changse the value of the turn variable to the next player
+            // Change the value of the turn variable to the next player
             players.dropInPlace(1)
             if (players.nonEmpty) {
               turn = players.head
@@ -332,7 +326,7 @@ object GUI extends SimpleSwingApplication {
           }
         }
 
-        // Paints the lowest scale of the game, thus recursively painting all of them
+        // Paints the bottommost scale of the game, thus recursively painting all of them
         paintScale(game.scales.head, this.width / 2, this.height - 100, 2 )
 
         // Calculates the points for each player and stores them in a variable
@@ -385,7 +379,7 @@ object GUI extends SimpleSwingApplication {
     contents = new GridPanel(7, 1) {
       contents += new Label("Select player amount")
       contents += playerAmount
-      contents += new Label("Select new scale probability")
+      contents += new Label("Select new scale probability (%)")
       contents += newScaleProbability
       contents += new Label("Select weight amount")
       contents += weightAmount

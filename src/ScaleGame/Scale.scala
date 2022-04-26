@@ -13,10 +13,10 @@ import scala.collection.mutable.Buffer
 class Scale(val radius: Int, val symbol: Char) {
 
   // Holds the tiles on the left side of the scale
-  var leftTiles: Array[Tile] = Array.ofDim(radius)
+  val leftTiles: Array[Tile] = Array.ofDim(radius)
 
   // Holds the tiles on the right side of the scale
-  var rightTiles: Array[Tile] = Array.ofDim(radius)
+  val rightTiles: Array[Tile] = Array.ofDim(radius)
 
   // Adds Tile-objects to the arrays
   def placeTiles(): Unit = {
@@ -73,17 +73,18 @@ class Scale(val radius: Int, val symbol: Char) {
     }
   }
 
-  // Places the current maximum height of weights on the left side of the scale
-  private def leftHeight() = {
+  // Calculates the current maximum height of weights on the left side of the scale
+  private def leftHeight(): Int = {
     leftTiles.maxBy(_.weights.length).weights.length
   }
 
-  // Places the current maximum height of weights on the right side of the scale
-  private def rightHeight() = {
+  // Calculates the current maximum height of weights on the right side of the scale
+  private def rightHeight(): Int = {
     rightTiles.maxBy(_.weights.length).weights.length
   }
 
-  def weightHeight() = {
+  // Calculates the current maximum height of weights on this scale
+  def weightHeight(): Int = {
     max(this.leftHeight(), this.rightHeight())
   }
 
@@ -91,14 +92,14 @@ class Scale(val radius: Int, val symbol: Char) {
    * Calculates total points on this scale for the players given in the parameter array using recursion
    *
    * @param players an array containing the players whose points will be calculated
-   * @return a Map in which each player in the players array is mapped to that player's total points on this scale
+   * @return a buffer of tuples in which each player in the players array is associated to that player's total points on this scale
    */
   def pointsPerPlayer(players: Array[Player]): Buffer[(Player, Int)] = {
 
     // Combines the tile arrays into one single array
     val allTiles = leftTiles ++ rightTiles
 
-    // Mutable Buffer that holds the Buffer that will be returned
+    // Mutable Buffer holds the points and will be returned
     val points = Buffer[(Player, Int)]()
 
     // Loops over the players and calculates the points for each player

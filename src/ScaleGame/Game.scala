@@ -7,7 +7,7 @@ import scala.util.Random
  * Each game is represented by a game object
  * It keeps track of all the scales and handles major functions of the game
  *
- * @param players an array containing the players that take a part in this game
+ * @param players an array containing the players that take part in this game
  * @param newScaleProbability the probability of a new scale spawning after a round
  */
 class Game (val players: Array[Player], val newScaleProbability: Int) {
@@ -23,15 +23,16 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
   // Adds a new scale on a random scale that is already in the game
   // Each scale can hold at most two scales, one on the left side and one on the right side
+  // Scales with a radius of 2 can hold only one scale
   private def addScale(): Unit = {
 
-    // Random for choosing a random scale in addScale
+    // Random for choosing a random scale
     val random = new Random(System.nanoTime)
 
     // Finds a scale that doesn't already have a scale on both sides and has a free tile
     val chosenScale = random.shuffle(scales).find( scale =>
-      (scale.radius != 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty) && scale.rightTiles(0).scale.isEmpty) ||
-      (scale.radius != 2 && scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty) && scale.leftTiles(0).scale.isEmpty) ||
+      (scale.radius != 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.leftTiles.exists(_.weights.isEmpty)) ||
+      (scale.radius != 2 && scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) ||
       // If the scale has a radius of two, it can only have a scale on one side
       (scale.radius == 2 && scale.leftTiles.forall(_.scale.isEmpty) && scale.rightTiles.forall(_.scale.isEmpty) && (scale.leftTiles.exists(_.weights.isEmpty) || scale.rightTiles.exists(_.weights.isEmpty)))
     )
@@ -40,10 +41,6 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
     if (chosenScale.isDefined) {
 
       val scale = chosenScale.get
-
-      val leftScale = scale.leftTiles(0).scale
-
-      val rightScale = scale.rightTiles(0).scale
 
       var chosenTile: Option[Tile] = None
 
@@ -56,7 +53,7 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
           } else {
             chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           }
-        } else { // If the random gives 2, places the scale on the right side
+        } else { // If the random gives 0, places the scale on the right side
           if (scale.rightTiles.forall(_.scale.isEmpty) && scale.rightTiles.exists(_.weights.isEmpty)) {
             chosenTile = Some(random.shuffle(scale.rightTiles.toBuffer).find(tile => (tile.weights.isEmpty && (tile.distance != 1))).get)
           } else {
@@ -84,8 +81,8 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
         val tile = chosenTile.get
 
-        // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions
-        val radius = Math.max(random.nextInt(tile.distance), 2) //  Math.max(tile.distance - 1, 2)
+        // Calculates a radius for the new scale, it can't be larger than the distance variable of the chosen tile to avoid collisions (but at minimum it can be 2)
+        val radius = Math.max(random.nextInt(tile.distance), 2)
 
         // Creates the new scale
         val newScale = new Scale(radius, symbol)
@@ -102,14 +99,14 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
    * Plays a turn in the game by placing the weight and determining if the scales got out of balance or not
    *
    * @param player the player whose turn it is
-   * @param scale the scale that the weight will be attempted to placed on
+   * @param scale the scale that the weight will be attempted to placed upon
    * @param side the side of the scale that the weight will be placed on ('L' or 'R')
    * @param position the distance from the center of the scale that the weight will be placed on
    * @return true if a scale got out of balance and false if the weight was placed successfully
    */
   def playTurn(player: Player, scale: Scale, side: Char, position: Int): Boolean = {
 
-    // Random for choosing the radius of the potential new scale
+    // Random for choosing whether a new scale will be added
     val random = new Random(System.nanoTime)
 
     // Becomes true if the scales got out of balance
@@ -119,10 +116,10 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
 
     // Save a copy of the potential weights already on the chosen tile into originalWeights
     if (side == 'L') {
-        originalWeights = scale.leftTiles(position - 1).weights.clone()
-      } else {
-        originalWeights = scale.rightTiles(position - 1).weights.clone()
-      }
+       originalWeights = scale.leftTiles(position - 1).weights.clone()
+     } else {
+       originalWeights = scale.rightTiles(position - 1).weights.clone()
+     }
 
       var originalOwner: Player = null
 
@@ -153,14 +150,14 @@ class Game (val players: Array[Player], val newScaleProbability: Int) {
     // Decrease the number of weights the player has left by one regardless of if the placing of the weight was successful or not
     player.weightsLeft -= 1
 
+    // Determine if all players have run out of weights
+    if (this.players.forall(_.weightsLeft == 0)) this.isOver = true
+
     // Determine if a new scale will be added
-    if ((random.nextInt(100) + 1 <= this.newScaleProbability) && (player == players.last)) {
+    if ((random.nextInt(100) + 1 <= this.newScaleProbability) && (player == players.last) && (!this.isOver)) {
       this.addScale()
       symbol = (symbol + 1).toChar
     }
-
-    // Determine if all players have run out of weights
-    if (this.players.forall(_.weightsLeft == 0)) this.isOver = true
 
     failed
   }

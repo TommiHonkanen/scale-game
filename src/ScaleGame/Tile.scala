@@ -4,7 +4,7 @@ import scala.collection.mutable.Buffer
 
 /**
  * Each scale consists of tile objects
- * Tile objects keep track of the weights and scales that are on top of it
+ * Tile objects keep track of the weights and the scale that could be on top of it
  *
  * @param distance the distance of this tile from the center of the scale
  */
