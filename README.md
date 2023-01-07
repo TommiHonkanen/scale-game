@@ -1,5 +1,11 @@
 # Scale Game
 
+## Running the app
+
+The app can be launched using the `GUI.scala` file. Requires a scala compiler.
+
+## Description
+
 Scale game is a game built with Scala Swing in which players compete against each other by stacking weights on top of
 scales and other weights. The game is turn-based and every players gets to place one weight each
 turn. Weights can be placed on any scale and players can choose the exact tile on which they want
